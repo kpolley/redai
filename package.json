@@ -1,6 +1,6 @@
 {
   "name": "@kpolley/redai",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Terminal workbench for AI-assisted vulnerability discovery and validation.",
   "type": "module",
   "bin": {
