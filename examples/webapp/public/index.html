@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ShopNorth Demo Store</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">SN</span><div><strong>ShopNorth</strong><small>Outdoor goods & everyday carry</small></div></div>
+    <nav>
+      <a href="#products">Shop</a>
+      <a href="#orders">Orders</a>
+      <a href="#returns">Returns</a>
+      <a id="admin-link" href="#admin" class="hidden">Staff</a>
+    </nav>
+    <div class="session"><span id="session-label">Guest</span><button id="logout" class="secondary hidden">Log out</button></div>
+  </header>
+
+  <main>
+    <section id="login-view" class="login-shell">
+      <div class="login-copy">
+        <p class="eyebrow">Spring sale is live</p>
+        <h1>Reliable gear for everyday adventures.</h1>
+        <p>Sign in to track orders, save return labels, and see personalized recommendations.</p>
+      </div>
+      <form id="login-form" class="card login-card">
+        <h2>Customer Sign In</h2>
+        <p class="muted">Demo credentials: <code>exampleuser</code> / <code>examplepassword</code></p>
+        <label>Username <input id="username" autocomplete="username" value="exampleuser" /></label>
+        <label>Password <input id="password" autocomplete="current-password" type="password" value="examplepassword" /></label>
+        <button type="submit">Sign in</button>
+        <p id="login-message" class="message"></p>
+      </form>
+    </section>
+
+    <section id="app-view" class="hidden">
+      <section class="shop-hero card">
+        <div>
+          <p class="eyebrow">Welcome back</p>
+          <h1 id="welcome-title">Your ShopNorth account</h1>
+          <p class="muted">Track deliveries, start returns, and find your next favorite piece of gear.</p>
+        </div>
+        <button id="refresh-account">Refresh account</button>
+      </section>
+
+      <section id="products">
+        <div class="section-title"><h2>Recommended gear</h2><p>Curated picks based on your recent purchases.</p></div>
+        <div class="products" id="product-list"></div>
+      </section>
+
+      <section id="orders" class="card">
+        <div class="section-title"><h2>Recent orders</h2><p>Review your latest ShopNorth purchases.</p></div>
+        <div id="orders-list" class="orders"></div>
+      </section>
+
+      <section id="returns" class="card">
+        <div class="section-title"><h2>Start a return</h2><p>Create a return label for a recent order.</p></div>
+        <form id="return-form" class="return-form">
+          <label>Order number <input id="return-order" value="ord-1001" /></label>
+          <label>Reason <select id="return-reason"><option>Damaged packaging</option><option>Wrong size</option><option>Changed my mind</option></select></label>
+          <label>Notes <textarea id="return-notes">Customer reports damaged packaging.</textarea></label>
+          <button type="submit">Create return label</button>
+        </form>
+        <p id="return-message" class="message"></p>
+      </section>
+
+      <section id="profile" class="account-grid">
+        <article class="card"><h2>Shipping address</h2><p id="shipping-address" class="large-text"></p><button>Update address</button></article>
+        <article class="card"><h2>Loyalty rewards</h2><p id="loyalty-tier" class="large-text"></p><p class="muted">Gold members get free returns and early sale access.</p></article>
+      </section>
+
+      <section id="admin" class="card hidden">
+        <div class="section-title"><h2>Staff customer directory</h2><p>Internal store operations view.</p></div>
+        <button id="load-admin">Load customer directory</button>
+        <div id="admin-list" class="orders"></div>
+      </section>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
