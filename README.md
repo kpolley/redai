@@ -4,7 +4,7 @@
 [![license](https://img.shields.io/npm/l/@kpolley/redai.svg)](./LICENSE)
 ![bun](https://img.shields.io/badge/runtime-bun%20%E2%89%A5%201.2-black)
 
-A terminal workbench for AI-assisted vulnerability discovery **and live validation**.
+A terminal workbench for AI-driven vulnerability discovery **and live validation**.
 
 ![RedAI terminal UI screenshot](https://static.kpolley.com/redai/redai.png)
 
