@@ -1,0 +1,9 @@
+{
+  "name": "redai-e2e-target",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "node src/server.js"
+  }
+}
