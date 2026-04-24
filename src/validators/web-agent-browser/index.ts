@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { cp, mkdir } from "node:fs/promises";
+import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { z } from "zod";
@@ -333,8 +334,13 @@ function formatSchemaError(stage: string, error: z.ZodError): string {
 }
 
 export async function browserSkillReadiness(): Promise<{ ready: boolean; reason: string }> {
-  if (!existsSync(".agents/skills/agent-browser/SKILL.md")) {
-    return { ready: false, reason: "agent-browser skill is not installed under .agents/skills." };
+  const globalSkill = join(homedir(), ".claude/skills/agent-browser/SKILL.md");
+  if (!existsSync(".agents/skills/agent-browser/SKILL.md") && !existsSync(globalSkill)) {
+    return {
+      ready: false,
+      reason:
+        "agent-browser skill is not installed under .agents/skills or ~/.claude/skills.",
+    };
   }
 
   try {
