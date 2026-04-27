@@ -10,7 +10,7 @@ Suitable for web-app findings that can be reproduced by driving a live browser â
 
 - Google Chrome
 - `agent-browser`
-- `.agents/skills/agent-browser` in the target workspace
+- `.agents/skills/agent-browser` in the target workspace, or `~/.claude/skills/agent-browser` globally
 - A browser environment marked `ready` in RedAI
 
 ## Environment Setup
