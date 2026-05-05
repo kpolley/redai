@@ -35,9 +35,7 @@ function SetupDetails({ environment }: { environment: ValidatorEnvironment }) {
         {environment.kind === "browser" ? (
           <Text>Profile: {environment.browser?.profilePath}</Text>
         ) : null}
-        {environment.kind === "browser" ? (
-          <Text>Dashboard: http://127.0.0.1:4848/?port=4849</Text>
-        ) : null}
+        {environment.kind === "browser" ? <Text>Dashboard: http://127.0.0.1:4848</Text> : null}
         {environment.kind === "ios-simulator" ? (
           <Text>App path: {environment.ios?.appPath || "not set"}</Text>
         ) : null}
@@ -55,11 +53,10 @@ function SetupDetails({ environment }: { environment: ValidatorEnvironment }) {
         {environment.kind === "browser" ? (
           <>
             <Text color="yellow">
-              Open the agent-browser dashboard and prepare the app state there.
+              Open the RedAI browser setup dashboard and prepare the app state there.
             </Text>
             <Text color="gray">
-              For a remote host, forward it with: ssh -N -L 4848:127.0.0.1:4848 -L
-              4849:127.0.0.1:4849 user@remote
+              For a remote host, forward it with: ssh -N -L 4848:127.0.0.1:4848 user@remote
             </Text>
           </>
         ) : (

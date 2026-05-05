@@ -67,8 +67,8 @@ function ValidationDetails({ state, job }: { state: ScanRunState; job: Validatio
         {job.simulatorUdid ? <Text>Simulator UDID: {job.simulatorUdid}</Text> : null}
         {job.status === "running" && job.agentBrowserHome ? (
           <Text color="yellow">
-            Press B to open the live dashboard. On remote hosts, forward the dashboard and stream
-            ports.
+            Press B to open the live agent-browser dashboard. Validation uses agent-browser's
+            dashboard.
           </Text>
         ) : null}
       </Box>

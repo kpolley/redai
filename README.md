@@ -31,7 +31,7 @@ cd examples/webapp && bun run dev      # http://localhost:3000
 redai
 ```
 
-In RedAI, create a Browser environment pointed at `http://localhost:3000`, open the `agent-browser` dashboard at `http://127.0.0.1:4848/?port=4849`, sign in once with `exampleuser` / `examplepassword`, mark it ready, then start a scan against `examples/webapp`. On a remote host, forward both dashboard ports with `ssh -N -L 4848:127.0.0.1:4848 -L 4849:127.0.0.1:4849 user@remote`. Watch the validators drive Chrome to confirm real findings.
+In RedAI, create a Browser environment pointed at `http://localhost:3000`, open RedAI's setup dashboard at `http://127.0.0.1:4848`, sign in once with `exampleuser` / `examplepassword`, mark it ready, then start a scan against `examples/webapp`. On a remote host, forward the setup dashboard with `ssh -N -L 4848:127.0.0.1:4848 user@remote`. Watch the validators drive Chrome to confirm real findings.
 
 The full report from a real scan of this app lives at [`examples/webapp/example-report.md`](./examples/webapp/example-report.md) — GitHub renders it inline so you can see what RedAI produces without running it.
 
@@ -104,7 +104,7 @@ New scans can only use environments marked `ready`. Once a scan starts, validato
 
 Two environments ship in the box as reference implementations:
 
-- **Browser** — a real Chrome instance driven via [`agent-browser`](https://github.com/vercel-labs/agent-browser) and visible through the dashboard, which can be port-forwarded from remote hosts. See [`src/validators/web-agent-browser/README.md`](./src/validators/web-agent-browser/README.md).
+- **Browser** — a real Chrome instance driven via [`agent-browser`](https://github.com/vercel-labs/agent-browser) and prepared through RedAI's lightweight setup dashboard, which can be port-forwarded from remote hosts. See [`src/validators/web-agent-browser/README.md`](./src/validators/web-agent-browser/README.md).
 - **iOS Simulator** — a per-scan template simulator driven via `xcrun simctl`. See [`src/validators/ios-simulator/README.md`](./src/validators/ios-simulator/README.md).
 
 Want to validate against a Linux VM, an Android emulator, a remote staging cluster, or something more exotic? Add a plugin — same interface as the bundled two.

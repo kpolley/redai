@@ -55,9 +55,7 @@ function EnvironmentDetails({ environment }: { environment: ValidatorEnvironment
         {environment.kind === "browser" ? (
           <Text>Profile: {environment.browser?.profilePath}</Text>
         ) : null}
-        {environment.kind === "browser" ? (
-          <Text>Dashboard: http://127.0.0.1:4848/?port=4849</Text>
-        ) : null}
+        {environment.kind === "browser" ? <Text>Dashboard: http://127.0.0.1:4848</Text> : null}
         {environment.kind === "ios-simulator" ? (
           <Text>App path: {environment.ios?.appPath || "not set"}</Text>
         ) : null}
@@ -70,8 +68,7 @@ function EnvironmentDetails({ environment }: { environment: ValidatorEnvironment
           Environments are prepared browser or simulator states used during validation.
         </Text>
         <Text color="gray">
-          Browser setup runs through the agent-browser dashboard. Forward ports 4848 and 4849 from
-          remote hosts.
+          Browser setup runs through RedAI's setup dashboard. Forward port 4848 from remote hosts.
         </Text>
       </Box>
     </Box>

@@ -3,10 +3,10 @@ import { mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import type { ValidatorEnvironment } from "../../domain";
+import { startBrowserSetupDashboard, stopBrowserSetupDashboard } from "./browser-setup-dashboard";
 
 const execFileAsync = promisify(execFile);
 const browserSetupDashboardPort = "4848";
-const browserSetupStreamPort = "4849";
 
 export async function openValidatorEnvironmentSetup(
   environment: ValidatorEnvironment,
@@ -37,21 +37,31 @@ async function openBrowserEnvironmentSetup(environment: ValidatorEnvironment): P
   const env = browserSetupEnvironment(environment);
   await mkdir(profilePath, { recursive: true });
   await mkdir(browserSetupHome(profilePath), { recursive: true });
-  await execFileAsync(
-    "agent-browser",
-    ["dashboard", "start", "--port", browserSetupDashboardPort],
-    {
-      env,
-      timeout: 10_000,
-    },
-  );
   await execFileAsync("agent-browser", ["open", appUrl], { env, timeout: 60_000 });
+  await execFileAsync("agent-browser", ["set", "viewport", "1280", "720"], {
+    env,
+    timeout: 10_000,
+  });
+  await execFileAsync("agent-browser", ["open", appUrl], { env, timeout: 60_000 });
+  try {
+    await startBrowserSetupDashboard({
+      id: environment.id,
+      appUrl,
+      env,
+      workDir: join(dirname(profilePath), "setup-dashboard"),
+      port: Number(browserSetupDashboardPort),
+    });
+  } catch (error) {
+    await execFileAsync("agent-browser", ["close"], { env, timeout: 10_000 }).catch(() => {});
+    throw error;
+  }
 }
 
 async function closeBrowserEnvironmentSetup(environment: ValidatorEnvironment): Promise<void> {
   const profilePath = environment.browser?.profilePath;
   if (!profilePath) return;
   const env = browserSetupEnvironment(environment);
+  await stopBrowserSetupDashboard(environment.id);
   try {
     await execFileAsync("agent-browser", ["close"], { env, timeout: 10_000 });
   } catch {
@@ -72,7 +82,6 @@ function browserSetupEnvironment(environment: ValidatorEnvironment): NodeJS.Proc
     AGENT_BROWSER_PROFILE: profilePath,
     AGENT_BROWSER_SESSION: environment.id,
     AGENT_BROWSER_SESSION_NAME: environment.id,
-    AGENT_BROWSER_STREAM_PORT: browserSetupStreamPort,
   };
 }
 
