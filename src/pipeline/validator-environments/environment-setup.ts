@@ -1,9 +1,12 @@
 import { execFile, spawn } from "node:child_process";
-import { mkdir } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import type { ValidatorEnvironment } from "../../domain";
+import { startBrowserSetupDashboard, stopBrowserSetupDashboard } from "./browser-setup-dashboard";
 
 const execFileAsync = promisify(execFile);
+const browserSetupDashboardPort = "4848";
 
 export async function openValidatorEnvironmentSetup(
   environment: ValidatorEnvironment,
@@ -31,30 +34,95 @@ async function openBrowserEnvironmentSetup(environment: ValidatorEnvironment): P
   if (!appUrl || !profilePath)
     throw new Error("Browser environment requires app URL and profile path.");
 
+  const env = browserSetupEnvironment(environment);
   await mkdir(profilePath, { recursive: true });
-  if (process.platform === "darwin") {
-    spawn("open", ["-na", "Google Chrome", "--args", `--user-data-dir=${profilePath}`, appUrl], {
-      detached: true,
-      stdio: "ignore",
-    }).unref();
-    return;
+  await mkdir(browserSetupHome(profilePath), { recursive: true });
+  await resetBrowserSetupProfile(environment.id, env, profilePath);
+  await execFileAsync("agent-browser", ["open", appUrl], { env, timeout: 60_000 });
+  await execFileAsync("agent-browser", ["set", "viewport", "1280", "720"], {
+    env,
+    timeout: 10_000,
+  });
+  await execFileAsync("agent-browser", ["open", appUrl], { env, timeout: 60_000 });
+  try {
+    await startBrowserSetupDashboard({
+      id: environment.id,
+      appUrl,
+      env,
+      workDir: join(dirname(profilePath), "setup-dashboard"),
+      port: Number(browserSetupDashboardPort),
+    });
+  } catch (error) {
+    await execFileAsync("agent-browser", ["close"], { env, timeout: 10_000 }).catch(() => {});
+    throw error;
   }
-
-  const browser = process.platform === "win32" ? "chrome" : "google-chrome";
-  spawn(browser, [`--user-data-dir=${profilePath}`, appUrl], {
-    detached: true,
-    stdio: "ignore",
-  }).unref();
 }
 
 async function closeBrowserEnvironmentSetup(environment: ValidatorEnvironment): Promise<void> {
   const profilePath = environment.browser?.profilePath;
   if (!profilePath) return;
+  const env = browserSetupEnvironment(environment);
+  await stopBrowserSetupDashboard(environment.id);
+  await closeBrowserSetupSession(env, profilePath);
   try {
-    await execFileAsync("pkill", ["-f", `--user-data-dir=${profilePath}`]);
+    await execFileAsync("agent-browser", ["dashboard", "stop"], { env, timeout: 10_000 });
   } catch {
-    // Browser may already be closed.
+    // The dashboard may already be stopped.
   }
+}
+
+function browserSetupEnvironment(environment: ValidatorEnvironment): NodeJS.ProcessEnv {
+  const profilePath = environment.browser?.profilePath ?? "";
+  return {
+    ...process.env,
+    AGENT_BROWSER_HOME: browserSetupHome(profilePath),
+    AGENT_BROWSER_PROFILE: profilePath,
+    AGENT_BROWSER_SESSION: environment.id,
+    AGENT_BROWSER_SESSION_NAME: environment.id,
+  };
+}
+
+async function resetBrowserSetupProfile(
+  environmentId: string,
+  env: NodeJS.ProcessEnv,
+  profilePath: string,
+): Promise<void> {
+  await stopBrowserSetupDashboard(environmentId);
+  await closeBrowserSetupSession(env, profilePath);
+  await removeChromeSingletonFiles(profilePath);
+}
+
+async function closeBrowserSetupSession(
+  env: NodeJS.ProcessEnv,
+  profilePath: string,
+): Promise<void> {
+  try {
+    await execFileAsync("agent-browser", ["close"], { env, timeout: 10_000 });
+  } catch {
+    // The setup session may already be closed.
+  }
+  await killChromeProcessesForProfile(profilePath);
+}
+
+async function killChromeProcessesForProfile(profilePath: string): Promise<void> {
+  if (process.platform === "win32") return;
+  try {
+    await execFileAsync("pkill", ["-f", `--user-data-dir=${escapeRegExp(profilePath)}`]);
+  } catch {
+    // Chrome may already be closed.
+  }
+}
+
+async function removeChromeSingletonFiles(profilePath: string): Promise<void> {
+  await Promise.all(
+    ["SingletonLock", "SingletonCookie", "SingletonSocket", "RunningChromeVersion"].map((name) =>
+      rm(join(profilePath, name), { force: true }),
+    ),
+  );
+}
+
+function browserSetupHome(profilePath: string): string {
+  return join(dirname(profilePath), "agent-browser-home");
 }
 
 async function openIosEnvironmentSetup(
@@ -131,4 +199,8 @@ async function latestAvailableRuntime(): Promise<string> {
 
 function safePathPart(value: string): string {
   return value.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 48) || "environment";
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
