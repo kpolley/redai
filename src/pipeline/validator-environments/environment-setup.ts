@@ -1,5 +1,6 @@
 import { execFile, spawn } from "node:child_process";
 import { mkdir } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import type { ValidatorEnvironment } from "../../domain";
 
@@ -31,30 +32,42 @@ async function openBrowserEnvironmentSetup(environment: ValidatorEnvironment): P
   if (!appUrl || !profilePath)
     throw new Error("Browser environment requires app URL and profile path.");
 
+  const env = browserSetupEnvironment(environment);
   await mkdir(profilePath, { recursive: true });
-  if (process.platform === "darwin") {
-    spawn("open", ["-na", "Google Chrome", "--args", `--user-data-dir=${profilePath}`, appUrl], {
-      detached: true,
-      stdio: "ignore",
-    }).unref();
-    return;
-  }
-
-  const browser = process.platform === "win32" ? "chrome" : "google-chrome";
-  spawn(browser, [`--user-data-dir=${profilePath}`, appUrl], {
-    detached: true,
-    stdio: "ignore",
-  }).unref();
+  await mkdir(browserSetupHome(profilePath), { recursive: true });
+  await execFileAsync("agent-browser", ["dashboard", "start"], { env, timeout: 10_000 });
+  await execFileAsync("agent-browser", ["open", appUrl], { env, timeout: 60_000 });
 }
 
 async function closeBrowserEnvironmentSetup(environment: ValidatorEnvironment): Promise<void> {
   const profilePath = environment.browser?.profilePath;
   if (!profilePath) return;
+  const env = browserSetupEnvironment(environment);
   try {
-    await execFileAsync("pkill", ["-f", `--user-data-dir=${profilePath}`]);
+    await execFileAsync("agent-browser", ["close"], { env, timeout: 10_000 });
   } catch {
-    // Browser may already be closed.
+    // The setup session may already be closed.
   }
+  try {
+    await execFileAsync("agent-browser", ["dashboard", "stop"], { env, timeout: 10_000 });
+  } catch {
+    // The dashboard may already be stopped.
+  }
+}
+
+function browserSetupEnvironment(environment: ValidatorEnvironment): NodeJS.ProcessEnv {
+  const profilePath = environment.browser?.profilePath ?? "";
+  return {
+    ...process.env,
+    AGENT_BROWSER_HOME: browserSetupHome(profilePath),
+    AGENT_BROWSER_PROFILE: profilePath,
+    AGENT_BROWSER_SESSION: environment.id,
+    AGENT_BROWSER_SESSION_NAME: environment.id,
+  };
+}
+
+function browserSetupHome(profilePath: string): string {
+  return join(dirname(profilePath), "agent-browser-home");
 }
 
 async function openIosEnvironmentSetup(

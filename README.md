@@ -31,7 +31,7 @@ cd examples/webapp && bun run dev      # http://localhost:3000
 redai
 ```
 
-In RedAI, create a Browser environment pointed at `http://localhost:3000`, sign in once with `exampleuser` / `examplepassword`, mark it ready, then start a scan against `examples/webapp`. Watch the validators drive Chrome to confirm real findings.
+In RedAI, create a Browser environment pointed at `http://localhost:3000`, open the `agent-browser` dashboard at `http://127.0.0.1:4848`, sign in once with `exampleuser` / `examplepassword`, mark it ready, then start a scan against `examples/webapp`. Watch the validators drive Chrome to confirm real findings.
 
 The full report from a real scan of this app lives at [`examples/webapp/example-report.md`](./examples/webapp/example-report.md) — GitHub renders it inline so you can see what RedAI produces without running it.
 
@@ -104,7 +104,7 @@ New scans can only use environments marked `ready`. Once a scan starts, validato
 
 Two environments ship in the box as reference implementations:
 
-- **Browser** — a real Chrome instance driven via [`agent-browser`](https://github.com/vercel-labs/agent-browser). See [`src/validators/web-agent-browser/README.md`](./src/validators/web-agent-browser/README.md).
+- **Browser** — a real Chrome instance driven via [`agent-browser`](https://github.com/vercel-labs/agent-browser) and visible through the dashboard, which can be port-forwarded from remote hosts. See [`src/validators/web-agent-browser/README.md`](./src/validators/web-agent-browser/README.md).
 - **iOS Simulator** — a per-scan template simulator driven via `xcrun simctl`. See [`src/validators/ios-simulator/README.md`](./src/validators/ios-simulator/README.md).
 
 Want to validate against a Linux VM, an Android emulator, a remote staging cluster, or something more exotic? Add a plugin — same interface as the bundled two.

@@ -35,6 +35,7 @@ function SetupDetails({ environment }: { environment: ValidatorEnvironment }) {
         {environment.kind === "browser" ? (
           <Text>Profile: {environment.browser?.profilePath}</Text>
         ) : null}
+        {environment.kind === "browser" ? <Text>Dashboard: http://127.0.0.1:4848</Text> : null}
         {environment.kind === "ios-simulator" ? (
           <Text>App path: {environment.ios?.appPath || "not set"}</Text>
         ) : null}
@@ -49,10 +50,20 @@ function SetupDetails({ environment }: { environment: ValidatorEnvironment }) {
         ) : null}
       </Box>
       <Box marginTop={2} flexDirection="column">
-        <Text color="yellow">
-          A setup {environment.kind === "browser" ? "browser" : "simulator app"} should be open. Log
-          in and prepare the app state there.
-        </Text>
+        {environment.kind === "browser" ? (
+          <>
+            <Text color="yellow">
+              Open the agent-browser dashboard and prepare the app state there.
+            </Text>
+            <Text color="gray">
+              For a remote host, forward it with: ssh -N -L 4848:127.0.0.1:4848 user@remote
+            </Text>
+          </>
+        ) : (
+          <Text color="yellow">
+            A setup simulator app should be open. Prepare the app state there.
+          </Text>
+        )}
         <Text color="gray">
           Press R when ready. Press O to reopen setup. Press Esc to leave it in setup state.
         </Text>

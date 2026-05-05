@@ -335,13 +335,8 @@ function formatSchemaError(stage: string, error: z.ZodError): string {
 
 export async function browserSkillReadiness(): Promise<{ ready: boolean; reason: string }> {
   const globalSkill = join(homedir(), ".claude/skills/agent-browser/SKILL.md");
-  if (!existsSync(".agents/skills/agent-browser/SKILL.md") && !existsSync(globalSkill)) {
-    return {
-      ready: false,
-      reason:
-        "agent-browser skill is not installed under .agents/skills or ~/.claude/skills.",
-    };
-  }
+  const hasSkillDocs =
+    existsSync(".agents/skills/agent-browser/SKILL.md") || existsSync(globalSkill);
 
   try {
     await execFileAsync("agent-browser", ["--version"]);
@@ -352,10 +347,19 @@ export async function browserSkillReadiness(): Promise<{ ready: boolean; reason:
   try {
     await execFileAsync("agent-browser", ["skills", "get", "agent-browser"], { timeout: 5000 });
   } catch {
+    try {
+      await execFileAsync("agent-browser", ["--help"], { timeout: 5000 });
+    } catch {
+      return {
+        ready: false,
+        reason: "agent-browser CLI is installed, but command help could not be loaded.",
+      };
+    }
     return {
-      ready: false,
-      reason:
-        "agent-browser CLI is installed, but it does not support `agent-browser skills get agent-browser`; upgrade agent-browser.",
+      ready: true,
+      reason: hasSkillDocs
+        ? "agent-browser CLI is ready; this version does not support `agent-browser skills get`, so agents will fall back to CLI help."
+        : "agent-browser CLI is ready; skill docs are not installed, so agents will fall back to CLI help.",
     };
   }
 
