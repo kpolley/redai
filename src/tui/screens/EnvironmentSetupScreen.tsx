@@ -56,7 +56,8 @@ function SetupDetails({ environment }: { environment: ValidatorEnvironment }) {
               Open the agent-browser dashboard and prepare the app state there.
             </Text>
             <Text color="gray">
-              For a remote host, forward it with: ssh -N -L 4848:127.0.0.1:4848 user@remote
+              For a remote host, forward it with: ssh -N -L 4848:127.0.0.1:4848 -L
+              4849:127.0.0.1:4849 user@remote
             </Text>
           </>
         ) : (

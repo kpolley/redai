@@ -22,10 +22,10 @@ Browser environments store:
 - optional auth/setup notes
 - status: `draft`, `setup`, `ready`, or `failed`
 
-Creating a browser environment starts an `agent-browser` session with an isolated profile and serves the live dashboard at `http://127.0.0.1:4848`. Use that dashboard to log in, seed app state, or otherwise prepare the target application. If RedAI is running on a remote host, forward the dashboard to your machine:
+Creating a browser environment starts an `agent-browser` session with an isolated profile and serves the live dashboard at `http://127.0.0.1:4848`. The setup session streams its live viewport on port `4849`. Use that dashboard to log in, seed app state, or otherwise prepare the target application. If RedAI is running on a remote host, forward both ports to your machine:
 
 ```sh
-ssh -N -L 4848:127.0.0.1:4848 user@remote
+ssh -N -L 4848:127.0.0.1:4848 -L 4849:127.0.0.1:4849 user@remote
 ```
 
 Return to RedAI and press `R` to mark the environment ready.

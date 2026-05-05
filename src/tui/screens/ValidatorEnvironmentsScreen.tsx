@@ -68,7 +68,7 @@ function EnvironmentDetails({ environment }: { environment: ValidatorEnvironment
           Environments are prepared browser or simulator states used during validation.
         </Text>
         <Text color="gray">
-          Browser setup runs through the agent-browser dashboard, which can be port-forwarded from
+          Browser setup runs through the agent-browser dashboard. Forward ports 4848 and 4849 from
           remote hosts.
         </Text>
       </Box>

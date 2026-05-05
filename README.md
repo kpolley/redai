@@ -31,7 +31,7 @@ cd examples/webapp && bun run dev      # http://localhost:3000
 redai
 ```
 
-In RedAI, create a Browser environment pointed at `http://localhost:3000`, open the `agent-browser` dashboard at `http://127.0.0.1:4848`, sign in once with `exampleuser` / `examplepassword`, mark it ready, then start a scan against `examples/webapp`. Watch the validators drive Chrome to confirm real findings.
+In RedAI, create a Browser environment pointed at `http://localhost:3000`, open the `agent-browser` dashboard at `http://127.0.0.1:4848`, sign in once with `exampleuser` / `examplepassword`, mark it ready, then start a scan against `examples/webapp`. On a remote host, forward both dashboard ports with `ssh -N -L 4848:127.0.0.1:4848 -L 4849:127.0.0.1:4849 user@remote`. Watch the validators drive Chrome to confirm real findings.
 
 The full report from a real scan of this app lives at [`examples/webapp/example-report.md`](./examples/webapp/example-report.md) — GitHub renders it inline so you can see what RedAI produces without running it.
 
