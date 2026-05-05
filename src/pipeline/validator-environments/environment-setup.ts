@@ -1,5 +1,5 @@
 import { execFile, spawn } from "node:child_process";
-import { mkdir } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import type { ValidatorEnvironment } from "../../domain";
@@ -37,6 +37,7 @@ async function openBrowserEnvironmentSetup(environment: ValidatorEnvironment): P
   const env = browserSetupEnvironment(environment);
   await mkdir(profilePath, { recursive: true });
   await mkdir(browserSetupHome(profilePath), { recursive: true });
+  await resetBrowserSetupProfile(environment.id, env, profilePath);
   await execFileAsync("agent-browser", ["open", appUrl], { env, timeout: 60_000 });
   await execFileAsync("agent-browser", ["set", "viewport", "1280", "720"], {
     env,
@@ -62,11 +63,7 @@ async function closeBrowserEnvironmentSetup(environment: ValidatorEnvironment): 
   if (!profilePath) return;
   const env = browserSetupEnvironment(environment);
   await stopBrowserSetupDashboard(environment.id);
-  try {
-    await execFileAsync("agent-browser", ["close"], { env, timeout: 10_000 });
-  } catch {
-    // The setup session may already be closed.
-  }
+  await closeBrowserSetupSession(env, profilePath);
   try {
     await execFileAsync("agent-browser", ["dashboard", "stop"], { env, timeout: 10_000 });
   } catch {
@@ -83,6 +80,45 @@ function browserSetupEnvironment(environment: ValidatorEnvironment): NodeJS.Proc
     AGENT_BROWSER_SESSION: environment.id,
     AGENT_BROWSER_SESSION_NAME: environment.id,
   };
+}
+
+async function resetBrowserSetupProfile(
+  environmentId: string,
+  env: NodeJS.ProcessEnv,
+  profilePath: string,
+): Promise<void> {
+  await stopBrowserSetupDashboard(environmentId);
+  await closeBrowserSetupSession(env, profilePath);
+  await removeChromeSingletonFiles(profilePath);
+}
+
+async function closeBrowserSetupSession(
+  env: NodeJS.ProcessEnv,
+  profilePath: string,
+): Promise<void> {
+  try {
+    await execFileAsync("agent-browser", ["close"], { env, timeout: 10_000 });
+  } catch {
+    // The setup session may already be closed.
+  }
+  await killChromeProcessesForProfile(profilePath);
+}
+
+async function killChromeProcessesForProfile(profilePath: string): Promise<void> {
+  if (process.platform === "win32") return;
+  try {
+    await execFileAsync("pkill", ["-f", `--user-data-dir=${escapeRegExp(profilePath)}`]);
+  } catch {
+    // Chrome may already be closed.
+  }
+}
+
+async function removeChromeSingletonFiles(profilePath: string): Promise<void> {
+  await Promise.all(
+    ["SingletonLock", "SingletonCookie", "SingletonSocket", "RunningChromeVersion"].map((name) =>
+      rm(join(profilePath, name), { force: true }),
+    ),
+  );
 }
 
 function browserSetupHome(profilePath: string): string {
@@ -163,4 +199,8 @@ async function latestAvailableRuntime(): Promise<string> {
 
 function safePathPart(value: string): string {
   return value.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 48) || "environment";
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
