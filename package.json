@@ -47,7 +47,7 @@
     "@anthropic-ai/claude-agent-sdk": "^0.2.92",
     "@anthropic-ai/sdk": "^0.85.0",
     "@inkjs/ui": "^2.0.0",
-    "@openai/codex-sdk": "^0.118.0",
+    "@openai/codex-sdk": "^0.130.0",
     "fast-glob": "^3.3.3",
     "ignore": "^7.0.5",
     "ink": "^6.8.0",
